@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => AppUsageScreen(),
-        '/generate-data': (context) => DataGenerationScreen(),
+        '/generate-data': (context) => DataGeneratorPage(),
       },
     );
   }
