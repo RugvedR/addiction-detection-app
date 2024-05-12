@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.3
+  fl_chart: ^0.35.0
   app_usage: ^2.0.0
 
 

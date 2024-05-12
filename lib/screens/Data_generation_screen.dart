@@ -46,8 +46,6 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
       },
       // Add more data entries as needed
     ];
-
-    // Send POST request
     await sendData(data);
   }
 
@@ -84,14 +82,20 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Data Generator'),
+        backgroundColor: Colors.green,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: 80),
+
             ElevatedButton(
               onPressed: generateData,
               child: Text('Generate Data and Send POST Request'),
+              style: ButtonStyle(
+    backgroundColor: MaterialStateProperty.all<Color>(Colors.green), // Change button color
+  ),
             ),
             SizedBox(height: 20),
             Text('Response Data:'),
