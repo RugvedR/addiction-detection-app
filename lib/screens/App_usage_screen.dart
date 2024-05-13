@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math; // Importing 'dart:math' as math
+import 'package:addiction_detection/screens/Data_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:app_usage/app_usage.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -55,7 +56,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('App Usage Example'),
+          title: const Text('App Usage Analysis'),
           backgroundColor: Colors.blue,
         ),
         body: Column(
@@ -78,7 +79,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0), // Adjust padding as needed
+                    padding: const EdgeInsets.all(8.0), 
                     child: ElevatedButton(
                       onPressed: generateGraph,
                       child: Text('Generate Graph'),
@@ -183,71 +184,63 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
   }
 
   Widget _buildCategoryChart() {
-  // Parse data from file
-  List<Map<String, dynamic>> data = _parseDataFromFile();
+    // Parse data from file
+    List<Map<String, dynamic>> data = _parseDataFromFile(DataManager.csvString);
 
-  // Print parsed data for debugging
-  print('Parsed Data:');
-  for (var entry in data) {
-    print(entry);
-  }
+    // Print parsed data for debugging
+    print('Parsed Data:');
+    for (var entry in data) {
+      print(entry);
+    }
 
-  // Calculate category-wise durations
-  Map<String, double> categoryDurations = {};
-  for (var entry in data) {
-    print("entry:::");
-    print(entry);
-    String category = entry['Category'];
-    Duration duration = _parseDuration(entry['Duration']);
-    double durationInMinutes = duration.inSeconds.toDouble();
-    print('Category: $category, Duration: $durationInMinutes');
-    categoryDurations[category] = (categoryDurations[category] ?? 0) + durationInMinutes;
-  }
+    // Calculate category-wise durations
+    Map<String, double> categoryDurations = {};
+    for (var entry in data) {
+      // print("entry:::");
+      // print(entry);
+      String category = entry['Category'];
+      Duration duration = _parseDuration(entry['Duration']);
+      double durationInMinutes = duration.inSeconds.toDouble();
+      print('Category: $category, Duration: $durationInMinutes');
+      categoryDurations[category] = (categoryDurations[category] ?? 0) + durationInMinutes;
+    }
 
-  // Filter out sections with zero or negative values
-  categoryDurations.removeWhere((key, value) => value <= 0);
+    // Filter out sections with zero or negative values
+    categoryDurations.removeWhere((key, value) => value <= 0);
 
-  // If all sections have zero or negative values, display a message
-  if (categoryDurations.isEmpty) {
-    return Center(
-      child: Text(
-        'No data available for pie chart.',
-        style: TextStyle(fontSize: 16),
+    // If all sections have zero or negative values, display a message
+    if (categoryDurations.isEmpty) {
+      return Center(
+        child: Text(
+          'No data available for pie chart.',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    // Create pie chart
+    return PieChart(
+      PieChartData(
+        sections: categoryDurations.entries
+            .map((entry) => PieChartSectionData(
+                  color: _getRandomColor(),
+                  value: entry.value,
+                  title: '${entry.key}',
+                  radius: 50,
+                  titleStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
 
-  // Create pie chart
-  return PieChart(
-    PieChartData(
-      sections: categoryDurations.entries
-          .map((entry) => PieChartSectionData(
-                color: _getRandomColor(),
-                value: entry.value,
-                title: '${entry.key}',
-                radius: 50,
-                titleStyle: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ))
-          .toList(),
-    ),
-  );
-}
 
-
-  List<Map<String, dynamic>> _parseDataFromFile() {
-    String csvString = '''App name,Date,Time,Duration,Category,Person
-Swiggy,16/04/2024,10:53:58 pm,0:00:35,Internet Browsing,1
-Zomato,16/04/2024,10:53:25 pm,0:00:02,Internet Browsing,1
-Truecaller,16/04/2024,10:53:23 pm,0:00:02,Other,1
-Zomato,16/04/2024,10:53:22 pm,0:00:01,Internet Browsing,1
-Phone,16/04/2024,10:53:19 pm,0:00:03,Other,1
-Phone,16/04/2024,10:53:04 pm,0:00:01,Other,1
-Zomato,16/04/2024,10:52:39 pm,0:00:24,Internet Browsing,1
-Phone,16/04/2024,10:52:35 pm,0:00:01,Other,1''';
+  List<Map<String, dynamic>> _parseDataFromFile(String csvString) {
+    
 
     List<String> lines = csvString.split('\n');
     List<String> headers = lines[0].split(',');
@@ -270,8 +263,8 @@ Phone,16/04/2024,10:52:35 pm,0:00:01,Other,1''';
     int hours = int.parse(parts[0]);
     int minutes = int.parse(parts[1]);
     int seconds = int.parse(parts[2].split('.')[0]); // Handling milliseconds
-    print("Duration::::");
-      print(Duration(hours: hours, minutes: minutes, seconds: seconds));
+    // print("Duration::::");
+    //   print(Duration(hours: hours, minutes: minutes, seconds: seconds));
     return Duration(hours: hours, minutes: minutes, seconds: seconds);
   }
 
