@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:math' as math; // Importing 'dart:math' as math
+import 'dart:math' as math; 
 import 'package:addiction_detection/screens/Data_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:app_usage/app_usage.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-// The rest of the code remains the same...
 
 
 
@@ -39,7 +38,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
   void generateGraph() {
     setState(() {
       _showGraph = true;
-      _showCategoryChart = false; // Reset _showCategoryChart
+      _showCategoryChart = false; 
     });
   }
 
@@ -88,7 +87,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0), // Adjust padding as needed
+                    padding: const EdgeInsets.all(8.0), 
                     child: ElevatedButton(
                       onPressed: generateCategoryChart,
                       child: Text('Category Wise Chart'),
@@ -184,16 +183,13 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
   }
 
   Widget _buildCategoryChart() {
-    // Parse data from file
     List<Map<String, dynamic>> data = _parseDataFromFile(DataManager.csvString);
 
-    // Print parsed data for debugging
     print('Parsed Data:');
     for (var entry in data) {
       print(entry);
     }
 
-    // Calculate category-wise durations
     Map<String, double> categoryDurations = {};
     for (var entry in data) {
       // print("entry:::");
@@ -205,10 +201,8 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
       categoryDurations[category] = (categoryDurations[category] ?? 0) + durationInMinutes;
     }
 
-    // Filter out sections with zero or negative values
     categoryDurations.removeWhere((key, value) => value <= 0);
 
-    // If all sections have zero or negative values, display a message
     if (categoryDurations.isEmpty) {
       return Center(
         child: Text(
@@ -218,7 +212,6 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
       );
     }
 
-    // Create pie chart
     return PieChart(
       PieChartData(
         sections: categoryDurations.entries
@@ -262,7 +255,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
     List<String> parts = durationString.split(':');
     int hours = int.parse(parts[0]);
     int minutes = int.parse(parts[1]);
-    int seconds = int.parse(parts[2].split('.')[0]); // Handling milliseconds
+    int seconds = int.parse(parts[2].split('.')[0]); 
     // print("Duration::::");
     //   print(Duration(hours: hours, minutes: minutes, seconds: seconds));
     return Duration(hours: hours, minutes: minutes, seconds: seconds);

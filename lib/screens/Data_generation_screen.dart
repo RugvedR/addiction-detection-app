@@ -16,7 +16,6 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
   String responseData = '';
 
   void generateData() async {
-    // Generate data in list format
     
     await sendData();
   }
@@ -25,34 +24,29 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
   Future<void> sendData() async {
     List<Map<String, dynamic>> data = _parseDataFromFile(DataManager.csvString);
 
-    // Print parsed data for debugging
     print('Parsed Data:');
     for (var entry in data) {
       print(entry);
     }
 
     
-    // Map to store aggregated durations for each category
     Map<String, Duration> categoryDurations = {};
 
-    // Calculate aggregated durations
     for (var entry in data) {
       String category = entry["Category"];
       Duration duration = _parseDuration(entry["Duration"]);
       categoryDurations[category] = (categoryDurations[category] ?? Duration.zero) + duration;
     }
 
-    // Construct new list with aggregated durations
     List<Map<String, dynamic>> newData = [];
     for (var category in categoryDurations.keys) {
       newData.add({
-        "Person": data[0]["Person"], // Assuming all entries have the same person
+        "Person": data[0]["Person"],
         "Category": category,
         "Duration": categoryDurations[category].toString()
       });
     }
 
-    // Print new data
     for (var entry in newData) {
       print(entry);
     }
@@ -69,7 +63,6 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
       print(newData);
 
       if (response.statusCode == 200) {
-        // Parse and handle the response data
         decodedData = jsonDecode(response.body);
         setState(() {
           responseData = decodedData.toString();
@@ -77,11 +70,9 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
         });
         // print(decodedData[0]);
       } else {
-        // Request failed
         print('POST request failed');
       }
     } catch (e) {
-      // Handle exceptions
       print('Error:: $e');
     }
   }
@@ -103,7 +94,7 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
               onPressed: generateData,
               child: Text('Generate Data and Send POST Request'),
               style: ButtonStyle(
-    backgroundColor: MaterialStateProperty.all<Color>(Colors.green), // Change button color
+    backgroundColor: MaterialStateProperty.all<Color>(Colors.green), 
   ),
             ),
             SizedBox(height: 10),
@@ -160,7 +151,7 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
     List<String> parts = durationString.split(':');
     int hours = int.parse(parts[0]);
     int minutes = int.parse(parts[1]);
-    int seconds = int.parse(parts[2].split('.')[0]); // Handling milliseconds
+    int seconds = int.parse(parts[2].split('.')[0]); 
     // print("Duration::::");
     //   print(Duration(hours: hours, minutes: minutes, seconds: seconds));
     return Duration(hours: hours, minutes: minutes, seconds: seconds);
