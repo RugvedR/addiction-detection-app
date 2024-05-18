@@ -26,7 +26,7 @@ class _AppUsageScreenState extends State<AppUsageScreen> {
   void getUsageStats() async {
     try {
       DateTime endDate = DateTime.now();
-      DateTime startDate = endDate.subtract(Duration(hours: 1));
+      DateTime startDate = endDate.subtract(Duration(hours: 24));
       List<AppUsageInfo> infoList =
           await AppUsage().getAppUsage(startDate, endDate);
       setState(() => _infos = infoList);
