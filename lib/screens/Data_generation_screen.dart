@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:addiction_detection/screens/Data_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:http/http.dart' as http;
 
 class DataGeneratorPage extends StatefulWidget {
   @override
@@ -30,67 +29,36 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
   }
 
   void generateData() async {
-    await sendData();
+    await mockSendData();
   }
 
-  Future<void> sendData() async {
-    List<Map<String, dynamic>> data = _parseDataFromFile(DataManager.csvString);
+  Future<void> mockSendData() async {
+    // Simulated data, mimicking the structure of the actual response from your API
+    List<Map<String, dynamic>> newData = [
+      {"Person": "John Doe", "Category": "Gaming", "Duration": "2:00:00"},
+      {"Person": "John Doe", "Category": "Social Media", "Duration": "3:00:00"},
+      {"Person": "John Doe", "Category": "Productivity", "Duration": "1:00:00"},
+      {"Person": "John Doe", "Category": "Internet Browsing", "Duration": "4:00:00"},
+    ];
 
-    print('Parsed Data:');
-    for (var entry in data) {
-      print(entry);
-    }
+    // Simulated API response
+    List<Map<String, dynamic>> simulatedResponse = [
+      {"Category": "Gaming", "Predicted_Addiction_Factor": 0},
+      {"Category": "Social Media", "Predicted_Addiction_Factor": 1},
+      {"Category": "Productivity", "Predicted_Addiction_Factor": 0},
+      {"Category": "Internet Browsing", "Predicted_Addiction_Factor": 1},
+    ];
 
-    Map<String, Duration> categoryDurations = {};
+    setState(() {
+      decodedData = simulatedResponse;
+      responseData = decodedData.toString();
+    });
 
-    for (var entry in data) {
-      String category = entry["Category"];
-      Duration duration = _parseDuration(entry["Duration"]);
-      categoryDurations[category] = (categoryDurations[category] ?? Duration.zero) + duration;
-    }
-
-    List<Map<String, dynamic>> newData = [];
-    for (var category in categoryDurations.keys) {
-      newData.add({
-        "Person": data[0]["Person"],
-        "Category": category,
-        "Duration": categoryDurations[category].toString()
-      });
-    }
-
-    for (var entry in newData) {
-      print(entry);
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/predict/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'data': newData}),
-      );
-
-      print(newData);
-
-      if (response.statusCode == 200) {
-        decodedData = jsonDecode(response.body);
-        setState(() {
-          responseData = decodedData.toString();
-        });
-
-        // Check for addiction factor and show notification if needed
-        for (var entry in decodedData) {
-          if (entry['Predicted_Addiction_Factor'] == 1) {
-            _showNotification(entry['Category']);
-          }
-        }
-
-      } else {
-        print('POST request failed');
+    // Check for addiction factor and show notification if needed
+    for (var entry in decodedData) {
+      if (entry['Predicted_Addiction_Factor'] == 1) {
+        _showNotification(entry['Category']);
       }
-    } catch (e) {
-      print('Error:: $e');
     }
   }
 
@@ -166,7 +134,7 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
       ),
     );
   }
-
+  
   List<Map<String, dynamic>> _parseDataFromFile(String csvString) {
     List<String> lines = csvString.split('\n');
     List<String> headers = lines[0].split(',');
