@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:addiction_detection/screens/Data_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 
 class DataGeneratorPage extends StatefulWidget {
@@ -9,17 +10,28 @@ class DataGeneratorPage extends StatefulWidget {
 }
 
 class _DataGeneratorPageState extends State<DataGeneratorPage> {
-  
   List<Map<String, dynamic>> generatedData = [];
   List<dynamic> decodedData = [];
 
   String responseData = '';
 
-  void generateData() async {
-    
-    await sendData();
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  @override
+  void initState() {
+    super.initState();
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsIOS = IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  void generateData() async {
+    await sendData();
+  }
 
   Future<void> sendData() async {
     List<Map<String, dynamic>> data = _parseDataFromFile(DataManager.csvString);
@@ -29,7 +41,6 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
       print(entry);
     }
 
-    
     Map<String, Duration> categoryDurations = {};
 
     for (var entry in data) {
@@ -66,15 +77,45 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
         decodedData = jsonDecode(response.body);
         setState(() {
           responseData = decodedData.toString();
-          // decodedData = decodedData;
         });
-        // print(decodedData[0]);
+
+        // Check for addiction factor and show notification if needed
+        for (var entry in decodedData) {
+          if (entry['Predicted_Addiction_Factor'] == 1) {
+            _showNotification(entry['Category']);
+          }
+        }
+
       } else {
         print('POST request failed');
       }
     } catch (e) {
       print('Error:: $e');
     }
+  }
+
+  Future<void> _showNotification(String category) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'your_channel_id', 
+      'your_channel_name', 
+      channelDescription: 'your_channel_description', // Use named argument here
+      importance: Importance.max, 
+      priority: Priority.high, 
+      ticker: 'ticker',
+    );
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Addiction Alert',
+      'Your addiction to $category is increasing, time to take a break from it!',
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
   }
 
   @override
@@ -89,13 +130,12 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: generateData,
               child: Text('Generate Data and Send POST Request'),
               style: ButtonStyle(
-    backgroundColor: MaterialStateProperty.all<Color>(Colors.green), 
-  ),
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+              ),
             ),
             SizedBox(height: 10),
             Text('Response Data:'),
@@ -109,7 +149,6 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
               ),
             ),
             Text('Predicted Addiction Factors:'),
-            // Text(decodedData.toString()),
             SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
@@ -127,10 +166,8 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
       ),
     );
   }
-  
-  List<Map<String, dynamic>> _parseDataFromFile(String csvString) {
-    
 
+  List<Map<String, dynamic>> _parseDataFromFile(String csvString) {
     List<String> lines = csvString.split('\n');
     List<String> headers = lines[0].split(',');
     List<Map<String, dynamic>> data = [];
@@ -151,28 +188,7 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
     List<String> parts = durationString.split(':');
     int hours = int.parse(parts[0]);
     int minutes = int.parse(parts[1]);
-    int seconds = int.parse(parts[2].split('.')[0]); 
-    // print("Duration::::");
-    //   print(Duration(hours: hours, minutes: minutes, seconds: seconds));
+    int seconds = int.parse(parts[2].split('.')[0]);
     return Duration(hours: hours, minutes: minutes, seconds: seconds);
   }
 }
-
-// class DataGenerationScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Data Generation'),
-//       ),
-//       body: Center(
-//         child: ElevatedButton(
-//           onPressed: () {
-//             // Implement data generation logic and API call here
-//           },
-//           child: Text('Generate Data and Send POST Request'),
-//         ),
-//       ),
-//     );
-//   }
-// }
