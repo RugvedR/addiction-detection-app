@@ -44,7 +44,7 @@ class _DataGeneratorPageState extends State<DataGeneratorPage> {
     // Simulated API response
     List<Map<String, dynamic>> simulatedResponse = [
       {"Category": "Gaming", "Predicted_Addiction_Factor": 0},
-      {"Category": "Social Media", "Predicted_Addiction_Factor": 1},
+      {"Category": "Social Media", "Predicted_Addiction_Factor": 0},
       {"Category": "Productivity", "Predicted_Addiction_Factor": 0},
       {"Category": "Internet Browsing", "Predicted_Addiction_Factor": 1},
     ];
